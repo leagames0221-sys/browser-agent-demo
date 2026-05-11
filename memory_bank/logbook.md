@@ -41,3 +41,24 @@
 - Chrome 別 profile `portfolio-sandbox` 作成 (chrome://settings/profiles)、 dummy 認証情報のみ投入
 - 自 repo 内に `examples/baseline.py` (browser-use 公式 example の literal 抽出 + commit msg attribution) で baseline 走行
 - pip 依存配線時 `pip-audit` + Dependabot for pip (.github/dependabot.yml) を Phase 1 内で apply
+
+---
+
+## 2026-05-11 — Portfolio unifying thesis 確定 (session: portfolio-init)
+
+**作業**:
+- user 提案 「全 free 制約下で best」 を portfolio unifying thesis として literal 採用
+- README 上位 fold に `## Selected under` section literal 追加 (4 constraint: zero CC / consumer laptop / public source / drift-CI enforced)
+- README に `## Why this is the literal best under the constraint set` section literal 追加 (5 row 選定 vs 却下 alternatives table)
+- README 上部に 3 constraint badge (shields.io) 追加
+- portfolio category: **constraint-optimized AI engineering** に literal 確定
+- drift-check workflow 拡張: Selected under section + 4 constraint 文字列 + portfolio category line + Why best section + Rejected alternatives column の literal 存在 verify (8 step → 10 step)
+
+**Thesis (literal 永続記録)**:
+> Constraint-optimized AI engineering — best possible AI systems under (1) zero credit card, (2) consumer laptop, (3) public source / OSS only, (4) drift-CI enforced。 cross-repo (browser-agent-demo + longctx-bench-honest) で unifying narrative。 採用 / 受託 共通の signal axis: 「制約下で最善を出す engineer」。
+
+**進捗**: thesis literal 確定 + drift-check 拡張完了見込、 commit + push + 再 verify 待ち
+
+**申し送り (次 session)**:
+- Phase 1 着手時、 全 ADR の Context section に `(constraint: zero CC / consumer laptop / public source / drift-CI)` を literal 明記、 thesis を ADR 単位でも literal 反映
+- craftstack 上位 fold は Phase 3 で同 thesis を hub message として配置 (2 repo + thesis 1 行)

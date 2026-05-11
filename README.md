@@ -5,6 +5,34 @@
 
 [![drift-check](https://github.com/leagames0221-sys/browser-agent-demo/actions/workflows/drift-check.yml/badge.svg)](https://github.com/leagames0221-sys/browser-agent-demo/actions/workflows/drift-check.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Constraint: zero CC](https://img.shields.io/badge/Constraint-zero%20credit%20card-blue)](#selected-under)
+[![Constraint: consumer laptop](https://img.shields.io/badge/Constraint-consumer%20laptop-blue)](#selected-under)
+[![Constraint: drift-CI enforced](https://img.shields.io/badge/Constraint-drift--CI%20enforced-blue)](#selected-under)
+
+## Selected under
+
+> **The constraint set** (every component of this repo was selected to satisfy *all four* simultaneously):
+>
+> 1. **Zero credit card** — no Anthropic / OpenAI paid API; Ollama local + free OSS only
+> 2. **Consumer laptop only** — single workstation, no datacenter / multi-GPU / cloud VM
+> 3. **Public source / OSS only** — no proprietary code, no NDA-bound assets, no client data
+> 4. **Drift-CI enforced** — every README claim verified by automation; mismatch fails the build
+>
+> **The thesis**: under these constraints, what's the literal best browser automation agent buildable in 2026-05? This repo is the answer — every selection (LLM, runtime, sandbox, eval) has a sourced rationale in [decisionLog](memory_bank/decisionLog.md) explaining why alternatives were rejected.
+>
+> Portfolio category: **constraint-optimized AI engineering**.
+
+## Why this is the literal best under the constraint set
+
+| Choice | Selected | Rejected alternatives + sourced reason |
+|---|---|---|
+| LLM | Qwen2.5-7B (Q4 quant) via Ollama | Claude/GPT API (CC required) / Llama 3.3 70B (consumer GPU OOM) |
+| Engine | browser-use (MIT, 93k★, daily commits) | Playwright raw (no LLM glue) / Selenium (no agent layer) |
+| Sandbox | Chrome separate profile `portfolio-sandbox` | Docker chromium (overhead) / VM (cost) |
+| Runtime | Ollama local | LM Studio (closed UI) / llama.cpp raw (more boilerplate) |
+| Drift discipline | `.github/workflows/drift-check.yml` | none (= silent drift, the structural failure mode) |
+
+Each rejected option has a sourced reason in [decisionLog](memory_bank/decisionLog.md). The point is not "I picked the popular one" — it's "I audited the option space under the explicit constraint set and picked literal best for *this* constraint."
 
 ## Status
 

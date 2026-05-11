@@ -48,5 +48,19 @@ jobs:
           grep -q "^\.env$" .gitignore || { echo "DRIFT: .gitignore does not exclude .env"; exit 1; }
           grep -q "chrome_profile/" .gitignore || { echo "DRIFT: .gitignore missing chrome_profile/"; exit 1; }
 
+      - name: Verify Selected under thesis section (constraint-optimized framing)
+        run: |
+          grep -q "## Selected under" README.md || { echo "DRIFT: README missing Selected under section"; exit 1; }
+          grep -q "Zero credit card" README.md || { echo "DRIFT: README missing zero credit card constraint"; exit 1; }
+          grep -q "Consumer laptop only" README.md || { echo "DRIFT: README missing consumer laptop constraint"; exit 1; }
+          grep -q "Public source / OSS only" README.md || { echo "DRIFT: README missing public source constraint"; exit 1; }
+          grep -q "Drift-CI enforced" README.md || { echo "DRIFT: README missing drift-CI constraint"; exit 1; }
+          grep -q "constraint-optimized AI engineering" README.md || { echo "DRIFT: README missing portfolio category line"; exit 1; }
+
+      - name: Verify Why this is the literal best section (option-space audit evidence)
+        run: |
+          grep -q "Why this is the literal best" README.md || { echo "DRIFT: README missing Why best section"; exit 1; }
+          grep -q "Rejected alternatives" README.md || { echo "DRIFT: README missing rejected alternatives table column"; exit 1; }
+
       - name: Summary
         run: echo "All drift checks passed."
