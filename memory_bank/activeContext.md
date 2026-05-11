@@ -2,7 +2,7 @@
 
 ## Current phase
 
-**Phase 2 (in progress)** — Defense-in-depth journey 3/5 complete (v1, v2, v3 literal ran with JSON evidence). v4 (Plan-Execute) + v5 (frontier fallback) await next session.
+**Phase 2 (COMPLETE)** — Defense-in-depth journey 5/5 literal complete (v1, v2, v3, v4, v5 all ran with JSON evidence). Phase 3 (craftstack integration + social distribution) is next.
 
 ## Current focus
 

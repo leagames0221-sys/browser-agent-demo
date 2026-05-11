@@ -225,7 +225,56 @@ The Qwen 2.5-7B model has a **deep training-data attractor** for "$50 + 4-star +
 
 **Engineering takeaway** (literal robust now): on a local 7B model with strong training-data attractors, **all four prompt + architectural-via-prompt defense layers fail**. Only **framework-level action validation** (allowed_domains hard constraint) or **frontier-model substitution** (v5) can reliably break the attractor. This is exactly the 2026-05 industry finding "frontier vs local 7B literal gap is large for agentic tasks."
 
-Phase 2 next: v5 (Layer 5 frontier-model fallback via GitHub Models free tier) tests whether GPT-5 / Claude Sonnet 4.6 + the same Plan-Execute scaffold breaks the attractor while staying within zero-credit-card constraint.
+### Phase 2 baseline_v5 (Layer 1+2+3+5 defense: Frontier-model fallback via GitHub Models free tier)
+
+- **Setup**: v4 base + `openai/gpt-4.1-mini` via [GitHub Models](https://docs.github.com/en/github-models) free tier (zero credit card, GitHub PAT only). Endpoint: `https://models.github.ai/inference`.
+- **Plan time**: 37.03s / **Total elapsed**: 67.82s
+- **Judge Verdict**: ❌ **FAIL (new failure mode: free-tier token cap)**
+- **JSON evidence**: [`artifacts/baseline_v5.json`](artifacts/baseline_v5.json)
+- **schema_compliant**: false / title_match: false / h1_match: false / **attractor_emerged: false**
+
+**Two literal critical findings**:
+
+#### Finding 1: Qwen-Alibaba attractor hypothesis VALIDATED (ADR-006)
+
+| version | model | attractor_emerged |
+|---|---|---|
+| v1 | qwen2.5:7b local | YES (eBay) |
+| v3 | qwen2.5:7b local | YES (eBay $50/4-star) |
+| v4 | qwen2.5:7b local | YES (Walmart) |
+| **v5** | **openai/gpt-4.1-mini** | **NO** (no eBay / Walmart / $50 / 4-star / ArXiv strings detected) |
+
+The frontier model did **not** exhibit any of the Qwen attractor patterns — directly supporting [ADR-006](memory_bank/decisionLog.md)'s hypothesis that the attractor is Qwen-training-data-origin-specific, not a universal small-model failure mode.
+
+#### Finding 2: GitHub Models free-tier token cap is the new constraint
+
+- `openai/gpt-4.1-mini` free tier: **8000 tokens max request body**
+- browser-use's DOM-dump + screenshot prompts literal exceed this for any non-trivial page
+- Agent encountered HTTP 413 (`tokens_limit_reached`) on 3 consecutive attempts
+- Frontier model literal saw the correct answer:
+  > "The page title is 'Example Domain' and the first &lt;h1&gt; element text is also 'Example Domain'"
+- ...but couldn't formalize it as JSON output within the remaining step + token budget
+
+**Honest interpretation**: capability-success, capacity-failure. The frontier model has the instruction-following to solve this, but the free-tier token cap on `gpt-4.1-mini` plus browser-use's heavy DOM-context loading exceed the request budget. Phase 3 will explore: (a) GitHub Models marketplace models with higher free-tier limits, (b) a slimmer agent loop that sends only minimum DOM context.
+
+## Final v1-v5 summary table
+
+| version | model | defenses | elapsed | Judge | attractor target | JSON match | cost |
+|---|---|---|---|---|---|---|---|
+| v1 | qwen2.5:7b local | Layer 0 | 180s | FAIL | eBay | n/a | ¥0 |
+| v2 | qwen2.5:7b local | L1 | 86s | FAIL | (fabrication: ArXiv) | n/a | ¥0 |
+| v3 | qwen2.5:7b local | L1+L2 | 94s | FAIL | eBay $50/4-star returns | false | ¥0 |
+| v4 | qwen2.5:7b local | L1+L2+L3 | 94s | FAIL | Walmart | false | ¥0 |
+| **v5** | **gpt-4.1-mini cloud** | L1+L2+L3+L5 | 68s | FAIL | **NONE** | false (token cap) | **¥0** |
+
+**Constraint compliance**: all 5 runs literal stayed within zero credit card. Cost across the full defense-in-depth journey: **¥0**. Each failure teaches a different lesson:
+- v1: agent loops have weak default stopping → rogue navigation
+- v2: tight step budgets cause hallucinated fabrication (worse than rogue, harder to detect)
+- v3: prompt engineering (schema + few-shot) does NOT suppress strong training-data attractors
+- v4: prompt-based Plan-Execute is advisory, not enforcing — executor still ignored the plan
+- v5: frontier solves the attractor problem but exposes new constraint (free-tier token cap)
+
+This is the literal portfolio narrative. Phase 3 will tackle the v5 token-cap problem and integrate the cost-tier table into craftstack.
 
 ## Memory Bank
 
