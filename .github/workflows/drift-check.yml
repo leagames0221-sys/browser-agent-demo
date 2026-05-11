@@ -62,5 +62,20 @@ jobs:
           grep -q "Why this is the literal best" README.md || { echo "DRIFT: README missing Why best section"; exit 1; }
           grep -q "Rejected alternatives" README.md || { echo "DRIFT: README missing rejected alternatives table column"; exit 1; }
 
+      - name: Verify pyproject.toml exists with project metadata
+        run: |
+          test -f pyproject.toml || { echo "DRIFT: pyproject.toml missing"; exit 1; }
+          grep -q "name = \"browser-agent-demo\"" pyproject.toml || { echo "DRIFT: pyproject.toml name mismatch"; exit 1; }
+          grep -q "requires-python" pyproject.toml || { echo "DRIFT: pyproject.toml missing requires-python"; exit 1; }
+
+      - name: Verify Dependabot config (pip ecosystem)
+        run: |
+          test -f .github/dependabot.yml || { echo "DRIFT: dependabot.yml missing"; exit 1; }
+          grep -q "package-ecosystem: \"pip\"" .github/dependabot.yml || { echo "DRIFT: dependabot.yml missing pip ecosystem"; exit 1; }
+
+      - name: Verify pip-audit declared in dev-dependencies
+        run: |
+          grep -q "pip-audit" pyproject.toml || { echo "DRIFT: pyproject.toml missing pip-audit (supply chain defense)"; exit 1; }
+
       - name: Summary
         run: echo "All drift checks passed."

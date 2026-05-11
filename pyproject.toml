@@ -1,0 +1,35 @@
+[project]
+name = "browser-agent-demo"
+version = "0.1.0"
+description = "Local-only browser automation agent. Zero API cost, sandboxed Chrome profile."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "leagames0221-sys" }]
+
+dependencies = [
+    # Core engine (browser-use 93k★ MIT, audited 2026-05-11)
+    "browser-use>=0.4.0",
+    # Local LLM client (Ollama Python SDK)
+    "ollama>=0.4.0",
+    # Browser automation (browser-use 内部依存だが明示 pin)
+    "playwright>=1.49.0",
+    # Async runtime
+    "anyio>=4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pip-audit>=2.7",
+    "ruff>=0.7",
+]
+
+[tool.uv]
+package = false
+# venv path is set via UV_PROJECT_ENVIRONMENT env var to D:\venvs\browser-agent-demo
+# to preserve C: drive capacity (see README "Disk layout" section)
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"

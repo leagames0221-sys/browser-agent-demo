@@ -62,6 +62,19 @@ Each rejected option has a sourced reason in [decisionLog](memory_bank/decisionL
 
 Phase 1 populates install commands. Current Phase 0 state has no runtime code.
 
+## Disk layout (consumer laptop constraint)
+
+The runtime footprint is moderate (~10GB: Ollama qwen2.5:7b Q4 ~5GB + Playwright Chromium ~500MB + .venv ~3GB). To preserve C: drive capacity, the venv is redirected to D: drive:
+
+```powershell
+$env:UV_PROJECT_ENVIRONMENT = "D:\venvs\browser-agent-demo"
+uv sync
+```
+
+Ollama model storage is configurable via `OLLAMA_MODELS` env var if D: relocation is needed.
+
+**Lifecycle**: D: footprint is needed only during Phase 1 install + Phase 2 task execution. After demo gif + numbers are pushed to this repo, D: venv is safe to delete. The repo itself is self-contained (code + gif + JSON = a few MB).
+
 ## Architecture
 
 Phase 1 populates architecture diagram. Phase 0 has scaffold structure only:

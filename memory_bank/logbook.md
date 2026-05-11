@@ -62,3 +62,29 @@
 **申し送り (次 session)**:
 - Phase 1 着手時、 全 ADR の Context section に `(constraint: zero CC / consumer laptop / public source / drift-CI)` を literal 明記、 thesis を ADR 単位でも literal 反映
 - craftstack 上位 fold は Phase 3 で同 thesis を hub message として配置 (2 repo + thesis 1 行)
+
+---
+
+## 2026-05-11 — Phase 1 prep: supply chain defense + D: disk redirect (session: portfolio-init)
+
+**作業**:
+- D: drive 環境変数 set (HF_HOME=D:\hf_cache + HF_HUB_CACHE=D:\hf_cache\hub) + D:\hf_cache\hub + D:\venvs dir 作成
+- C: drive 45.6GB free (9.6%) = Windows safe zone 危険水域、 D: 182.7GB free に literal 逃して回避
+- pyproject.toml skeleton 配置: browser-use>=0.4 + ollama>=0.4 + playwright>=1.49 + anyio + dev (pytest + pip-audit + ruff)
+- .github/dependabot.yml 配線 (pip ecosystem + github-actions ecosystem、 weekly schedule)
+- drift-check workflow 拡張: pyproject.toml metadata + dependabot.yml pip ecosystem + pip-audit declared verify の 3 step 追加 (12 step → 15 step)
+- README 「Disk layout (consumer laptop constraint)」 section 追加、 D: venv path + Lifecycle (Phase 2 後 D: 削除 OK) 明記
+
+**Rationale (5 site WebSearch + WebFetch evidence)**:
+- supply chain defense layer (pyproject + dependabot + pip-audit) は **install と同 commit / 同 PR で literal 配線必須**、 後付け = D-DRIFT-PREVENT-INFRA literally too late 違反
+- D: redirect は consumer laptop constraint (D-CONSUMER-HW) の literal 実装、 C: 9.6% free を 維持しつつ 15GB model + 5GB venv を D: 受け止め
+
+**進捗**: Phase 1 prep 配線完了見込、 commit + push + drift-check 再 verify 待ち
+
+**申し送り (次 session = Phase 1 heavy install)**:
+- Ollama install: `winget install Ollama.Ollama --silent` (admin UAC prompt 可能性 ★★)
+- `ollama pull qwen2.5:7b` (~5GB、 OLLAMA_MODELS env で D: redirect 検討)
+- Chrome 別 profile `portfolio-sandbox` 作成 (chrome://settings/profiles)
+- browser-use の `examples/models/ollama.py` + `examples/features/video_recording.py` を 自 repo `examples/` に literal copy、 commit msg `derived from browser-use@<sha>`
+- `uv sync` (UV_PROJECT_ENVIRONMENT=D:\venvs\browser-agent-demo set 後) で deps install + uv.lock commit
+- baseline 走行 (browser-use simple example が Ollama + Chrome sandbox で動くか literal verify)
