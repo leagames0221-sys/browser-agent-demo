@@ -88,3 +88,26 @@
 - browser-use の `examples/models/ollama.py` + `examples/features/video_recording.py` を 自 repo `examples/` に literal copy、 commit msg `derived from browser-use@<sha>`
 - `uv sync` (UV_PROJECT_ENVIRONMENT=D:\venvs\browser-agent-demo set 後) で deps install + uv.lock commit
 - baseline 走行 (browser-use simple example が Ollama + Chrome sandbox で動くか literal verify)
+
+---
+
+## 2026-05-11 — Phase 1 extract: browser-use 3 file 抽出 + NOTICE + SETUP runbook (session: portfolio-init)
+
+**作業**:
+- prior art audit verified: browser-use 93,377★ MIT (last push: today 2026-05-11)、 SHA `9b4b8d8054a2d23f13a141aa7c871dea1e939450`
+- `examples/` dir に literal 抽出 (verbatim copies、 改造 0%):
+  - `examples/models/ollama.py` — Ollama LLM integration
+  - `examples/features/video_recording.py` — session recording (Phase 2 demo gif source)
+  - `examples/simple.py` — minimal agent loop reference
+- `NOTICE.md` 配置: derived sources attribution + audit log + license compatibility note
+- `SETUP.md` 配置: Phase 1 install runbook (Ollama winget + Chrome sandbox profile + uv sync with D: venv + pip-audit + baseline run)
+- env verified: WSL2 Ubuntu v2 already installed、 huggingface_hub 1.10.2 in system Python (hf command available)
+
+**error**: なし (verbatim copy 成功、 NOTICE / SETUP markdown 書き込み 成功)
+
+**進捗**: Phase 1 file extract + docs 配線完了見込、 commit + push 待ち。 Ollama install + Chrome profile + baseline 走行は user 介入 step (UAC + Chrome UI)。
+
+**申し送り (次 session = Ollama install + baseline 走行)**:
+- user 側で SETUP.md Step 1-3 実行 (winget install Ollama + ollama pull qwen2.5:7b + Chrome `portfolio-sandbox` profile 作成)
+- 自動化可能 step: SETUP.md Step 4-7 (uv sync + pip-audit + playwright install + baseline run)
+- baseline 完走後、 README Status を Phase 1 → Phase 2 候補に更新、 cost-tier table の Qwen 列 第 1 cell に baseline 数値 populate
