@@ -1,0 +1,49 @@
+# Secrets (D2-Security)
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+credentials.json
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Chrome sandbox profile data (do not commit — may contain cookies)
+chrome_profile/
+playwright-cache/
+.playwright/
+
+# Task outputs (regenerable)
+output/
+artifacts/
+*.csv.tmp
+*.log
+
+# Claude Code local
+.claude/settings.local.json

@@ -1,0 +1,52 @@
+name: drift-check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-claims:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify LICENSE is MIT
+        run: |
+          grep -q "MIT License" LICENSE || { echo "DRIFT: LICENSE is not MIT"; exit 1; }
+
+      - name: Verify Tier 2 CLAUDE.md exists
+        run: |
+          test -f CLAUDE.md || { echo "DRIFT: CLAUDE.md missing"; exit 1; }
+
+      - name: Verify spec.md exists
+        run: |
+          test -f spec.md || { echo "DRIFT: spec.md missing"; exit 1; }
+
+      - name: Verify Memory Bank has 5 Cline-pattern files
+        run: |
+          expected=(logbook activeContext decisionLog productContext systemPatterns)
+          for f in "${expected[@]}"; do
+            test -f "memory_bank/${f}.md" || { echo "DRIFT: memory_bank/${f}.md missing"; exit 1; }
+          done
+
+      - name: Verify drift-check workflow self-reference
+        run: |
+          test -f .github/workflows/drift-check.yml || { echo "DRIFT: self workflow missing"; exit 1; }
+
+      - name: Verify README declares current phase
+        run: |
+          grep -qE "^\*\*Phase [0-9]+\*\*" README.md || { echo "DRIFT: README missing Phase declaration"; exit 1; }
+
+      - name: Verify .gitignore covers secrets
+        run: |
+          grep -q "^\.env$" .gitignore || { echo "DRIFT: .gitignore does not exclude .env"; exit 1; }
+          grep -q "chrome_profile/" .gitignore || { echo "DRIFT: .gitignore missing chrome_profile/"; exit 1; }
+
+      - name: Summary
+        run: echo "All drift checks passed."
