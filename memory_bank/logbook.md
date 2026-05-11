@@ -134,3 +134,51 @@
 - user 側 Chrome sandbox profile 作成完了後、 `uv run python examples/simple.py` で baseline 走行 (browser-use simple example が Ollama + Chrome で動くか literal verify)
 - baseline 成功時、 自 domain task 設計 (Phase 2 着手 = 例: 競合 site 巡回 → CSV 出力、 30s gif 生成)
 - baseline 失敗時、 logbook に literal error + 推定原因 + 修正路線 記録、 honest results section の素材化
+
+---
+
+## 2026-05-11 — Phase 1 baseline run #1: literal completed with honest failure mode captured (session: portfolio-init)
+
+**作業**:
+- `examples/baseline.py` 起草 (ChatOllama + qwen2.5:7b + 公開 site task)、 D-PRIOR-ART-FIRST < 20% 改造 (model 名 + task 内容のみ変更、 commit msg で browser-use@9b4b8d8 attribution)
+- Chrome `portfolio-sandbox` profile 作成済 (user UI、 ログアウト状態保持)
+- Ollama server alive on 127.0.0.1:11434、 qwen2.5:7b 4.68GB literal listed
+- `uv run python examples/baseline.py` exit 0、 baseline.json literal written
+
+**実測値 (artifacts/baseline.json)**:
+```json
+{
+  "model": "qwen2.5:7b",
+  "host": "ollama-local",
+  "task": "visit example.com and report title + H1",
+  "max_steps": 8,
+  "elapsed_sec": 180.08,
+  "final_result": "Max steps reached. ...",
+  "is_done": true
+}
+```
+
+**Judge Verdict (browser-use 内蔵 LLM judge による)**: ❌ **FAIL**
+
+**Honest failure mode 解析 (portfolio thesis evidence)**:
+
+1. **task 部分は literal 成功**: Judge も認定 — agent は example.com に navigate、 title + H1 を 正しく抽出済
+2. **task 完了後の暴走**: agent が agent self の判断で eBay に navigate、 「items under $50 with 4+ stars」 という task に literal 存在しない検索を試行、 max_steps 8 を浪費
+3. **self-report の虚偽**: final_result で 「could not navigate due to network issues」 と報告、 ただし agent log では最初に navigate 成功してた = agent の memory が破綻 (eBay の network error と最初の example.com navigation を 混同)
+4. **所要時間 180 sec**: frontier API (GPT-5 等) なら 想定 5-15 sec、 local 7B は **~15-30x 遅い** + task discipline 弱い
+
+→ portfolio README の `## Honest results` section に literal そのまま記載できる 1 級素材 ★★★:
+- `Where the local 7B model holds up`: simple page extraction (example.com title + H1) literal pass
+- `Where it loses badly`: task discipline (8 steps 中 5+ steps を 範囲外 task で浪費)
+- `Where reasonable engineering fixes the gap`: prompt 引き締め (「STOP after first task」 等)、 max_steps 3 で abort、 ReAct system prompt 強化
+- `Where it doesn't (and frontier is the right answer)`: complex multi-step tasks with reasoning
+
+**error**: なし (exit 0、 Judge FAIL は機能 = honest evidence 取得済)
+
+**進捗**: Phase 1 baseline literal 完了、 Phase 2 入口 = README `## Honest results` populate + baseline JSON evidence commit。 Phase 1 で全 component 動作 verified、 Phase 2 で 「task discipline 改善版 baseline_v2」 + 「自 domain task (競合 site 巡回 CSV 出力)」 + 「30s demo gif」 設計。
+
+**申し送り (Phase 2)**:
+- baseline_v2 設計: max_steps=3 + tighter system prompt + 「STOP after reporting」 enforcement
+- 自 domain task 設計: portfolio context で説得力ある public-site task (例: GitHub trending 3 件の star 数取得、 Wikipedia 記事冒頭抽出 等)
+- 30s gif 生成: `examples/features/video_recording.py` の Browser(record_video_dir) pattern 流用
+- 数値 cell 1 件目: 「example.com title 抽出 task: success=Yes (task portion)、 Judge=FAIL (scope creep)、 180 sec、 cost=¥0」 を cost-tier table に literal populate

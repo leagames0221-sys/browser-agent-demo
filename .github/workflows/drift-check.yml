@@ -77,5 +77,11 @@ jobs:
         run: |
           grep -q "pip-audit" pyproject.toml || { echo "DRIFT: pyproject.toml missing pip-audit (supply chain defense)"; exit 1; }
 
+      - name: Verify Honest results section populated with baseline data
+        run: |
+          grep -q "Phase 1 baseline run #1" README.md || { echo "DRIFT: README missing Phase 1 baseline run #1 entry"; exit 1; }
+          test -f artifacts/baseline.json || { echo "DRIFT: artifacts/baseline.json missing (JSON evidence required)"; exit 1; }
+          grep -q "qwen2.5:7b" artifacts/baseline.json || { echo "DRIFT: baseline.json missing model field"; exit 1; }
+
       - name: Summary
         run: echo "All drift checks passed."
