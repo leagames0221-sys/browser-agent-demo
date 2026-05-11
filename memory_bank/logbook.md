@@ -182,3 +182,41 @@
 - 自 domain task 設計: portfolio context で説得力ある public-site task (例: GitHub trending 3 件の star 数取得、 Wikipedia 記事冒頭抽出 等)
 - 30s gif 生成: `examples/features/video_recording.py` の Browser(record_video_dir) pattern 流用
 - 数値 cell 1 件目: 「example.com title 抽出 task: success=Yes (task portion)、 Judge=FAIL (scope creep)、 180 sec、 cost=¥0」 を cost-tier table に literal populate
+
+---
+
+## 2026-05-11 — Phase 2 baseline_v2 (Layer 1 defense applied): new failure mode discovered (session: portfolio-init)
+
+**作業**:
+- ADR-004 (2026-05 benchmark data calibration) + ADR-005 (5-layer defense-in-depth design) を decisionLog に literal append
+- `examples/baseline_v2.py` 実装: Layer 1 defense (max_steps=2 + URL allowlist via task scoping + STOP semantics in prompt)
+- 実行: exit 1 (Windows console cp932 + em-dash UnicodeEncodeError、 ただし JSON 書き込みは literal 成功)
+- em-dash → ASCII hyphen 修正済
+
+**実測値 (artifacts/baseline_v2.json)**:
+- elapsed: 86.32s (v1 180s から 52% 短縮 ★★★)
+- failure mode: **完全に新規 = under-budget hallucination** (max_steps=2 で agent が rush → ArXiv CS.AI papers の 偽 metadata 15 件を fabricated、 完全な hallucination)
+- Judge Verdict: FAIL (failure mode swap、 PASS にはまだ届かない)
+
+**Honest 解析 (portfolio thesis evidence)**:
+- ✅ Layer 1 は eBay 暴走 (v1 failure) は literal 防御
+- ❌ ただし step budget 圧縮で 新 failure mode (under-pressure fabrication) が emerge
+- → 「single layer defense では不十分、 v3 以降 (Layer 2: JSON schema + few-shot) で fabrication 対策必要」 = ADR-005 の literal validation
+
+**Phase 2 portfolio narrative の literal 完成度**:
+- v1 vs v2 comparison table を README Honest results section に literal 追加
+- drift-check workflow に baseline_v2.json + version=v2 + max_steps=2 marker verify step 追加
+- 「v1 暴走 → v2 fabrication → v3 何が出るか?」 の literal cliff-hanger narrative が portfolio 完成
+
+**error**:
+- print(json.dumps()) で em-dash → cp932 encoding fail
+- 修正: ASCII hyphen に literal swap (baseline_v2.py)
+- JSON 書き込み自体は utf-8 で先に literal 成功してたので evidence loss なし
+
+**進捗**: Phase 2 baseline_v2 literal commit 待ち、 drift-check 緑保持要
+
+**申し送り**:
+- 本 session 内に v2 commit + push + drift-check verify 完遂
+- Phase 2 v3 (Layer 2: JSON schema + few-shot STOP examples) は次 session 候補
+- longctx baseline (transformers + Qwen 1M + RULER) も次 session 候補
+- v1 → v2 の 「failure mode swap」 自体が portfolio narrative の literal 主役、 v3 で 「fabrication 対策」 仮説を verify する次 step

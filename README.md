@@ -118,7 +118,35 @@ This section documents real measured outcomes — successes and failures — und
 - Frontier API (estimated 5-15 sec for the same task): ~¥1-3 per run, but ~15-30x faster with task discipline
 - → For one-shot simple extractions, local is viable; for multi-step agentic flows, frontier is honestly the right call
 
-Phase 2 will run baseline_v2 with engineering fixes (stricter prompt + tighter step budget) and populate richer cost-tier comparisons.
+### Phase 2 baseline_v2 (Layer 1 defense: max_steps=2 + URL allowlist + STOP semantics)
+
+- **Setup**: same model + task as v1, but max_steps reduced from 8 to 2, task prompt rewritten with explicit "after reporting, immediately call done() and STOP" + "Do NOT navigate to any other URL"
+- **Elapsed**: 86.32 sec (~1.5 min, **2x faster than v1's 180s**)
+- **Judge Verdict**: ❌ **FAIL (different failure mode)**
+- **JSON evidence**: [`artifacts/baseline_v2.json`](artifacts/baseline_v2.json)
+
+**What changed from v1**:
+- ✅ **eBay rogue navigation prevented**: Layer 1 worked — agent did not leave example.com
+- ✅ **Step 1: literal correct navigation + DOM extraction started** (`document.title` + `document.querySelector('h1').innerText`)
+- ❌ **NEW failure mode: under-budget hallucination**: With max_steps=2, the agent rushed and **fabricated entirely fake results** in Step 2 — claimed to have "collected metadata for 15 of 20 ArXiv CS.AI papers" with completely made-up paper titles, authors, and publication dates. None of this was in the task, none of this matched reality.
+
+**Honest interpretation**:
+- Layer 1 (step budget cap) prevented one failure mode (rogue navigation) but introduced another (under-pressure fabrication). A 7B model squeezed into 2 steps cannot complete: extract title + extract h1 + properly call done() — so it generates plausible-looking but completely false output to "finish" within budget.
+- Lesson: **single-layer defense is insufficient**. Step-budget alone trades one failure class for another. Layer 2 (JSON schema constraint forcing structured output) and Layer 3 (Plan-Execute separation) are needed to fix this.
+- This is the literal "v2 → v3 → v4 → v5 journey" rationale documented in [decisionLog ADR-005](memory_bank/decisionLog.md).
+
+**v1 vs v2 comparison**:
+
+| metric | v1 (no defense) | v2 (Layer 1) | delta |
+|---|---|---|---|
+| max_steps | 8 | 2 | -6 |
+| elapsed | 180.08s | 86.32s | -52% (faster) |
+| failure mode | rogue navigation (eBay) | fabricated output (ArXiv hallucination) | mode swap |
+| Judge | FAIL | FAIL | unchanged |
+| cost | ¥0 | ¥0 | unchanged |
+| task-relevant work done | partial (title + h1 extracted before drift) | partial (Step 1 started extraction) | similar |
+
+Phase 2 next: v3 with Layer 2 (JSON schema constraint + few-shot STOP examples) will test whether structured output gates the fabrication failure.
 
 ## Memory Bank
 

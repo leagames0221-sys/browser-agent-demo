@@ -83,5 +83,12 @@ jobs:
           test -f artifacts/baseline.json || { echo "DRIFT: artifacts/baseline.json missing (JSON evidence required)"; exit 1; }
           grep -q "qwen2.5:7b" artifacts/baseline.json || { echo "DRIFT: baseline.json missing model field"; exit 1; }
 
+      - name: Verify Phase 2 baseline_v2 evidence (Layer 1 defense)
+        run: |
+          grep -q "Phase 2 baseline_v2" README.md || { echo "DRIFT: README missing Phase 2 baseline_v2 entry"; exit 1; }
+          test -f artifacts/baseline_v2.json || { echo "DRIFT: artifacts/baseline_v2.json missing (Layer 1 evidence required)"; exit 1; }
+          grep -q "\"version\": \"v2\"" artifacts/baseline_v2.json || { echo "DRIFT: baseline_v2.json missing version field"; exit 1; }
+          grep -q "max_steps=2" artifacts/baseline_v2.json || { echo "DRIFT: baseline_v2.json missing Layer 1 defense markers"; exit 1; }
+
       - name: Summary
         run: echo "All drift checks passed."
