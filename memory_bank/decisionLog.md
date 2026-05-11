@@ -106,3 +106,38 @@
 - ⚠️ Layer 5 frontier fallback は GitHub Models rate limit (~50 calls / day free tier、 2026-05 推定 ★) 内で運用、 超過時は honest 記録
 
 **Verify**: 各 v に対し `artifacts/baseline_v{N}.json` を literal 出力、 drift-CI で 5 file 存在 + 内容 sanity check、 README cost-tier table が JSON 由来自動生成。
+
+---
+
+## ADR-006 (2026-05-11): Qwen training-data attractor causal hypothesis — Alibaba e-commerce origin
+
+**Context**: baseline_v1 (no defense) と baseline_v3 (Layer 1+2 defense) の **両方** で同型の 「$50 + 4-star + 15 items」 fabrication attractor が literal 発現。 prompt engineering (Layer 1+2) では literal 抑制不能。 attractor の **causal origin** を honest に仮説化し、 portfolio research finding として literal 公開する価値あり。
+
+**Hypothesis (★★ tier, single-LLM observation)**:
+
+Qwen 2.5-7B-Instruct は [Alibaba Cloud Qwen team](https://github.com/QwenLM) 製 LLM。 Alibaba は world's largest e-commerce company (Taobao / Tmall / AliExpress)、 訓練 corpus に **e-commerce product listings / reviews / filter UI patterns が他社 model より literal 高比率で存在する** 可能性が高い (公式 training data composition は未公開、 ★★ tier の推論)。
+
+→ 「商品検索 + 価格フィルタ ($50 以下) + 評価フィルタ (4-star+) + 商品リスト 15 items」 は Alibaba LLM の **訓練 data 由来 strong attractor** であり、 task disengagement 時に LLM が default に fall back する pattern として literal 発現する仮説。
+
+**Implications**:
+1. **Model selection 時の training-data origin awareness**: e-commerce attractor を避けたい場合は 非 Alibaba LLM 候補 (Llama / DeepSeek / Mistral) を検討すべき
+2. **Universal training-data attractor の存在**: 全 LLM が org-specific attractor を持つ可能性、 OpenAI 系は SEO/marketing 文体、 Google 系は 検索結果 pattern、 Anthropic 系は (推測) academic citation pattern 等
+3. **Defense layer 設計への literal 反映**: prompt engineering alone では attractor 抑制不能 (v3 で literal 証明)、 **architectural intervention (Plan-Execute / LLM-as-judge gate)** が真に必要
+
+**Sources (D8)**:
+- [QwenLM organization](https://github.com/QwenLM) - Alibaba Cloud Qwen team
+- [Qwen2.5 Technical Report](https://arxiv.org/abs/2412.15115) - training data composition は 「diverse high-quality」 とのみ記述、 e-commerce 比率は 非公開
+- 自実測: baseline_v1 (180s, eBay rogue + $50/4-star filter attempt) + baseline_v3 (94s, $50/4-star/15-products fabrication) の 2 run consistent evidence
+
+**Caveat (D9 ★★)**:
+- Single-LLM observation、 n=1 model、 2 runs。 statistical significance 主張は literal 不能、 hypothesis tier
+- 同 attractor が他 size Qwen (1.5B / 14B / 32B / 72B) でも literal 発現するかは未測定
+- 比較対象 (Llama / DeepSeek 等) の同 task 走行は本 PJ Phase 2 scope 外 (D-WASTE-ZERO、 portfolio narrative 上 必要性低)
+
+**Consequences**:
+- ✅ portfolio research finding として literal 公開、 「model 選定時に training-data origin を意識する engineer」 signal
+- ✅ recruiter / AI lab 向けに 「面白い observation を honest 開示できる」 signal、 Anthropic / OpenAI research 系職種で literal valuable
+- ⚠️ Qwen team / Alibaba 公式 stance は (推測 hypothesis なので) 一切示唆せず、 user 観察として literal 提示
+- ⚠️ ★★ tier hypothesis であることを README + ADR で literal 明示、 「証明」 主張は禁止
+
+**Verify**: README `## Honest results` section に hypothesis box として literal 配置、 v4 (Plan-Execute) で attractor が architecturally suppressed されるか literal 観察 = hypothesis の indirect verification。

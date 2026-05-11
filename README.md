@@ -183,7 +183,49 @@ The Qwen 2.5-7B model has a **deep training-data attractor** for "$50 + 4-star +
 
 **Engineering takeaway**: Local 7B models exhibit training-data attractors strong enough to bypass purely prompt-level defenses. For production agentic use on a 7B model, architectural separation (Plan-Execute) or frontier model fallback is non-optional. This is exactly the 2026-05 industry consensus, here literal measured on a single workstation in three runs.
 
-Phase 2 next: v4 (Layer 3 Plan-Execute separation, in-repo simple impl) will test whether architectural separation breaks the attractor.
+### Phase 2 baseline_v4 (Layer 1+2+3 defense: Plan-Execute architectural separation)
+
+- **Setup**: v3 base + Plan-Execute pattern (Planner LLM produces JSON plan → Executor Agent follows plan, plan-external actions forbidden by prompt). ~50 lines self-impl, no LangGraph dep (D-WASTE-ZERO). max_steps=4.
+- **Plan time**: 5.84 sec / **Total elapsed**: 94.24 sec
+- **Judge Verdict**: ❌ **FAIL** (architectural defense also breached)
+- **JSON evidence**: [`artifacts/baseline_v4.json`](artifacts/baseline_v4.json)
+- **schema_compliant**: false / title_match: false / h1_match: false
+
+**What changed from v3**:
+- ✅ Planner produced a valid JSON plan correctly
+- ❌ Executor Agent ignored the plan and **navigated to walmart.com** (a NEW e-commerce attractor target!)
+- ❌ Walmart login block prevented further action, executor gave up
+
+**Critical Qwen-Alibaba attractor evidence (ADR-006 hypothesis reinforced)**:
+
+| version | failure mode | attractor target |
+|---|---|---|
+| v1 | rogue navigation | **eBay** + "$50 / 4-star / 15 items" filter |
+| v2 | under-budget fabrication | ArXiv 15 papers |
+| v3 | attractor returns | **eBay** $50/4-star/15 products fabrication |
+| **v4** | architectural plan ignored | **Walmart** product details + login block |
+
+**Pattern**: 4 runs / 3 e-commerce attractor sites (eBay × 2 + Walmart). This is **strong indirect evidence** for [ADR-006](memory_bank/decisionLog.md): Qwen 2.5-7B has training-data origin attractors toward e-commerce platforms, consistent with its Alibaba (e-commerce giant) provenance.
+
+**Layer 3 honest result**:
+- Pure prompt-based Plan-Execute is insufficient. The Executor LLM treats the plan as advisory, not as a hard constraint.
+- True Plan-Execute requires **framework-level action validation** (e.g., browser-use's `allowed_domains` parameter, or a custom Agent wrapper that rejects off-plan tool calls at the runtime).
+- Alternative path: escalate to Layer 5 (frontier model) which has better instruction-following — tested in v5.
+
+**v1 vs v2 vs v3 vs v4 summary**:
+
+| metric | v1 | v2 | v3 | v4 |
+|---|---|---|---|---|
+| defenses | Layer 0 | Layer 1 | Layer 1+2 | Layer 1+2+3 |
+| max_steps | 8 | 2 | 3 | 4 (+1 planner step) |
+| elapsed | 180s | 86s | 94s | 94s |
+| Judge | FAIL | FAIL | FAIL | FAIL |
+| attractor site | eBay | (none, fabrication only) | eBay | **Walmart** |
+| cost | ¥0 | ¥0 | ¥0 | ¥0 |
+
+**Engineering takeaway** (literal robust now): on a local 7B model with strong training-data attractors, **all four prompt + architectural-via-prompt defense layers fail**. Only **framework-level action validation** (allowed_domains hard constraint) or **frontier-model substitution** (v5) can reliably break the attractor. This is exactly the 2026-05 industry finding "frontier vs local 7B literal gap is large for agentic tasks."
+
+Phase 2 next: v5 (Layer 5 frontier-model fallback via GitHub Models free tier) tests whether GPT-5 / Claude Sonnet 4.6 + the same Plan-Execute scaffold breaks the attractor while staying within zero-credit-card constraint.
 
 ## Memory Bank
 

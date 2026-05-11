@@ -97,5 +97,12 @@ jobs:
           grep -q "\"version\": \"v3\"" artifacts/baseline_v3.json || { echo "DRIFT: baseline_v3.json missing version field"; exit 1; }
           grep -q "schema_compliant" artifacts/baseline_v3.json || { echo "DRIFT: baseline_v3.json missing schema_compliant field"; exit 1; }
 
+      - name: Verify Phase 2 baseline_v4 evidence (Layer 1+2+3 Plan-Execute)
+        run: |
+          grep -q "Phase 2 baseline_v4" README.md || { echo "DRIFT: README missing Phase 2 baseline_v4 entry"; exit 1; }
+          test -f artifacts/baseline_v4.json || { echo "DRIFT: artifacts/baseline_v4.json missing (Layer 3 evidence required)"; exit 1; }
+          grep -q "\"version\": \"v4\"" artifacts/baseline_v4.json || { echo "DRIFT: baseline_v4.json missing version field"; exit 1; }
+          grep -q "Plan-Execute" artifacts/baseline_v4.json || { echo "DRIFT: baseline_v4.json missing Plan-Execute marker"; exit 1; }
+
       - name: Summary
         run: echo "All drift checks passed."

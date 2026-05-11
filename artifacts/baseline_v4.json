@@ -1,0 +1,36 @@
+{
+  "version": "v4",
+  "model": "qwen2.5:7b",
+  "host": "ollama-local",
+  "defense_layers": [
+    "Layer 1: max_steps=4 + URL allowlist + STOP semantics",
+    "Layer 2: JSON schema constraint + few-shot examples",
+    "Layer 3: Plan-Execute architectural separation (planner LLM + executor LLM)"
+  ],
+  "task_summary": "visit example.com, return {title, h1} as JSON, then STOP",
+  "plan_obj": {
+    "plan": [],
+    "raw": "```json\n{\n    \"plan\": [\n        \"navigate to https://example.com\",\n        \"extract text of <title> tag and store as title\",\n        \"extract text of first <h1> tag and store as h1\",\n        \"call done with the JSON result: {\"title\": \\\"\" + title + \"\\\", \\\"h1\\\": \\\"\" + h1 + \"\\\"}\"\n    ]\n}\n```",
+    "parse_error": "Expecting ',' delimiter: line 6 column 44 (char 218)"
+  },
+  "plan_time_sec": 5.84,
+  "total_elapsed_sec": 94.24,
+  "final_result": "Reached max_steps with incomplete task. Managed to verify some elements but could not proceed due to login block. Found partial product details on the current page.",
+  "is_done": true,
+  "schema_compliant": false,
+  "parsed_title": null,
+  "parsed_h1": null,
+  "expected_title": "Example Domain",
+  "expected_h1": "Example Domain",
+  "title_match": false,
+  "h1_match": false,
+  "attractor_emerged": false,
+  "attractor_strings_checked": [
+    "$50",
+    "4-star",
+    "15 products",
+    "15 papers",
+    "ArXiv",
+    "Taobao"
+  ]
+}
