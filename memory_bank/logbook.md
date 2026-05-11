@@ -111,3 +111,26 @@
 - user 側で SETUP.md Step 1-3 実行 (winget install Ollama + ollama pull qwen2.5:7b + Chrome `portfolio-sandbox` profile 作成)
 - 自動化可能 step: SETUP.md Step 4-7 (uv sync + pip-audit + playwright install + baseline run)
 - baseline 完走後、 README Status を Phase 1 → Phase 2 候補に更新、 cost-tier table の Qwen 列 第 1 cell に baseline 数値 populate
+
+---
+
+## 2026-05-11 — Phase 1 install layer: Ollama + uv sync + pip-audit + Playwright (session: portfolio-init)
+
+**作業 (literal 実測値で 全項 GREEN)**:
+- `winget install Ollama.Ollama --silent --accept-package-agreements --accept-source-agreements` → exit 0、 install path: `C:\Users\admin\AppData\Local\Programs\Ollama\ollama.exe` (per-user install)、 version: 0.23.1
+- `OLLAMA_MODELS=D:\ollama_models` User-level 永続 env set + D:\ollama_models dir 作成 (D: drive redirect)
+- `ollama pull qwen2.5:7b` → 4.7GB main layer 100% + 全 layer pull 完了 (sha256 verify 中だが DL は完成)
+- `uv sync --extra dev` (UV_PROJECT_ENVIRONMENT=D:\venvs\browser-agent-demo) → exit 0、 全 deps install (browser-use + ollama + playwright + pytest + pip-audit + ruff 等)
+- `uv run pip-audit --strict` → exit 0、 **"No known vulnerabilities found"** ★★★ (supply chain defense literal verified)
+- `uv run playwright install chromium` → exit 0 (Chrome 自動操作 binary 配置)
+- `uv.lock` 5029 行 生成 (D-NPM-3GUARD pip equivalent literal lockfile pin)
+
+**error**: なし
+
+**進捗**: Phase 1 自動化 step 全件 GREEN。 残 user 介入 step = Chrome `portfolio-sandbox` profile 作成 (chrome://settings/profiles)、 baseline run。
+
+**申し送り (次 session)**:
+- uv.lock commit + push、 drift-check 緑保持
+- user 側 Chrome sandbox profile 作成完了後、 `uv run python examples/simple.py` で baseline 走行 (browser-use simple example が Ollama + Chrome で動くか literal verify)
+- baseline 成功時、 自 domain task 設計 (Phase 2 着手 = 例: 競合 site 巡回 → CSV 出力、 30s gif 生成)
+- baseline 失敗時、 logbook に literal error + 推定原因 + 修正路線 記録、 honest results section の素材化
