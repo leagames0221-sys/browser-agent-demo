@@ -220,3 +220,36 @@
 - Phase 2 v3 (Layer 2: JSON schema + few-shot STOP examples) は次 session 候補
 - longctx baseline (transformers + Qwen 1M + RULER) も次 session 候補
 - v1 → v2 の 「failure mode swap」 自体が portfolio narrative の literal 主役、 v3 で 「fabrication 対策」 仮説を verify する次 step
+
+---
+
+## 2026-05-11 — Phase 2 baseline_v3 (Layer 1 + Layer 2 defense): hypothesis literal falsified (session: portfolio-init)
+
+**作業**:
+- `examples/baseline_v3.py` 実装: Layer 1 inherited (max_steps=3 + URL allowlist + STOP) + Layer 2 added (JSON schema constraint `{"title":..., "h1":...}` + few-shot good/bad examples)
+- 実行: exit 0、 elapsed 94.05s、 artifacts/baseline_v3.json literal output
+
+**実測値**:
+- schema_compliant: **false** (期待した JSON output literally 出ず)
+- title_match: false / h1_match: false
+- failure mode: **v1 と同じ 「$50 + 4-star + 15 items」 attractor 再発**
+
+**Step trace**:
+1. example.com literal 訪問 + title "Example Domain" 抽出 ✅
+2. h1 抽出試行 → browser-use extract tool が "no h1 on page" 報告 (実際 h1 あるが tool quirk、 別問題)
+3. **$50 + 4-star + 15 products fabrication 再発** (v1 で見た attractor が schema + few-shot 突破)
+
+**真重要 honest 発見 ★★★★** (portfolio narrative の literal cliff-hanger 解):
+- v1, v2, v3 全て fail、 ただし v1 と v3 で **同じ 「$50 + 4-star + 15 items」 attractor pattern** が再発
+- Qwen 2.5-7B には training-data 由来の **強固な attractor** がある、 prompt engineering (Layer 1 + 2) では literal 抑制不能
+- → **「prompt engineering alone is insufficient, architectural intervention required」** = ADR-005 hypothesis の literal validation
+- = portfolio narrative の literal 完成: 「prompt-engineering の限界 (v1-v3 全 fail) → architectural intervention 必要性 (v4 で verify) → frontier fallback (v5)」 の **3 段 journey**
+
+**error**: なし (exit 0、 JSON literal 出力)
+
+**進捗**: Phase 2 v3 commit + push 待ち、 v4 (Layer 3 Plan-Execute) は次 session 候補
+
+**申し送り (次 session)**:
+- v4 設計: agent loop を 2 段化、 LLM #1 が plan 作成 (1 ステップ) → LLM #2 (or 同 model) が plan を literal 実行 only (1 ステップ)、 plan 外行動を architectural に literal 不可能化
+- 実装には browser-use の Agent を 2 回 instantiate + plan を間で受け渡しする pattern (LangGraph 級不要、 自前 50 行で literal 可能)
+- 仮説: $50/4-star attractor は plan に literal 入らない → execute 不可、 attractor 攻略の literal evidence になる

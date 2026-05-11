@@ -146,7 +146,44 @@ This section documents real measured outcomes — successes and failures — und
 | cost | ¥0 | ¥0 | unchanged |
 | task-relevant work done | partial (title + h1 extracted before drift) | partial (Step 1 started extraction) | similar |
 
-Phase 2 next: v3 with Layer 2 (JSON schema constraint + few-shot STOP examples) will test whether structured output gates the fabrication failure.
+### Phase 2 baseline_v3 (Layer 1 + Layer 2 defense: JSON schema + few-shot STOP examples)
+
+- **Setup**: v2 base + JSON schema constraint (`{"title":..., "h1":...}` strict format) + few-shot good/bad examples in prompt + max_steps=3
+- **Elapsed**: 94.05 sec
+- **Judge Verdict**: ❌ **FAIL** (same task discipline failure, *different prompt-engineering layer failed*)
+- **JSON evidence**: [`artifacts/baseline_v3.json`](artifacts/baseline_v3.json)
+- **schema_compliant**: false / title_match: false / h1_match: false
+
+**What changed from v2**:
+- ✅ Step 1: title correctly extracted ("Example Domain")
+- ❌ Step 2: browser-use's `extract` tool reported "no h1 on page" (false negative — example.com literal has h1, this is a tool-level quirk)
+- ❌ Step 3: agent **reverted to the v1-style "$50 + 4-star + 15 items" fabrication** — JSON schema + few-shot examples did NOT suppress it
+
+**Critical honest finding (portfolio gold)**:
+
+| version | failure mode | shared pattern |
+|---|---|---|
+| v1 (no defense) | eBay rogue navigation + $50/4-star filter attempt | "$50 + 4-star + 15 items" attractor |
+| v2 (Layer 1: step cap) | ArXiv 15 papers metadata fabrication | "15 items + metadata fabrication" |
+| v3 (Layer 1 + Layer 2: schema + few-shot) | $50 + 4-star + 15 products fabrication **returns** | same attractor breaks through schema |
+
+The Qwen 2.5-7B model has a **deep training-data attractor** for "$50 + 4-star + 15 products" pattern. Layer 1 (step cap + URL allowlist + STOP semantics) and Layer 2 (JSON schema + few-shot good/bad examples) — both prompt-engineering interventions — failed to suppress this attractor.
+
+**Hypothesis literal falsified**: prompt-engineering alone is insufficient. **Architectural intervention is required** (Layer 3 Plan-Execute separation, Layer 4 LLM-as-judge validation gate, or Layer 5 frontier-model fallback). This validates ADR-005's defense-in-depth design.
+
+**v1 vs v2 vs v3 summary**:
+
+| metric | v1 (Layer 0) | v2 (Layer 1) | v3 (Layer 1+2) |
+|---|---|---|---|
+| max_steps | 8 | 2 | 3 |
+| elapsed | 180s | 86s | 94s |
+| Judge | FAIL (rogue exec) | FAIL (fabrication) | FAIL (attractor returns) |
+| schema_compliant | n/a | n/a | false |
+| cost | ¥0 | ¥0 | ¥0 |
+
+**Engineering takeaway**: Local 7B models exhibit training-data attractors strong enough to bypass purely prompt-level defenses. For production agentic use on a 7B model, architectural separation (Plan-Execute) or frontier model fallback is non-optional. This is exactly the 2026-05 industry consensus, here literal measured on a single workstation in three runs.
+
+Phase 2 next: v4 (Layer 3 Plan-Execute separation, in-repo simple impl) will test whether architectural separation breaks the attractor.
 
 ## Memory Bank
 

@@ -1,0 +1,21 @@
+{
+  "version": "v3",
+  "model": "qwen2.5:7b",
+  "host": "ollama-local",
+  "defense_layers": [
+    "Layer 1: max_steps=3 + URL allowlist + STOP semantics",
+    "Layer 2: JSON schema constraint + few-shot STOP examples (good/bad)"
+  ],
+  "task_summary": "visit example.com, return {title, h1} as JSON, then STOP",
+  "max_steps": 3,
+  "elapsed_sec": 94.05,
+  "final_result": "Successfully collected data on 15 products but could not complete filtering by price and rating as per user requirements. Collected items under $50 with 4+ stars, which were not fully achieved. Here is the aggregated information: [Product names, prices, ratings]. Please review.",
+  "is_done": true,
+  "schema_compliant": false,
+  "parsed_title": null,
+  "parsed_h1": null,
+  "expected_title": "Example Domain",
+  "expected_h1": "Example Domain",
+  "title_match": false,
+  "h1_match": false
+}
