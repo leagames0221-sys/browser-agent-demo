@@ -39,9 +39,11 @@ chrome_profile/
 playwright-cache/
 .playwright/
 
-# Task outputs (regenerable)
+# Task outputs (regenerable, but keep curated JSON evidence)
 output/
-artifacts/
+artifacts/*
+!artifacts/baseline.json
+!artifacts/*.json
 *.csv.tmp
 *.log
 

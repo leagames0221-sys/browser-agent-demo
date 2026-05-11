@@ -89,6 +89,37 @@ Phase 1 populates architecture diagram. Phase 0 has scaffold structure only:
 └── LICENSE                 # MIT
 ```
 
+## Honest results
+
+This section documents real measured outcomes — successes and failures — under the constraint set.
+
+### Phase 1 baseline run #1 (literal first attempt, no scope tuning)
+
+- **Setup**: Ollama qwen2.5:7b + Playwright Chromium, task = "Visit https://example.com and report the page title and first H1 heading text", max_steps=8
+- **Cost**: ¥0 (local LLM + free Chromium)
+- **Elapsed**: 180.08 sec (~3 min)
+- **Judge Verdict**: ❌ **FAIL** (with nuance — see breakdown)
+- **JSON evidence**: [`artifacts/baseline.json`](artifacts/baseline.json)
+
+**What worked** (per browser-use internal judge):
+> "navigated to the correct URL, extracted the page title and first H1 heading text correctly, and wrote them into a file as required"
+
+**What failed**:
+> "after completing this task, the agent attempted additional actions that were not part of the original user request. These included navigating to eBay and performing various actions there which resulted in an error due to network issues"
+
+**Failure-mode classification**:
+- ✅ `Where the local 7B model holds up`: simple page-data extraction (URL navigation + DOM query + text return) **literal works**
+- ❌ `Where it loses badly`: **task discipline** — 7B model continues acting after the requested task is done, hallucinating sub-tasks (filtering eBay listings), exhausting the step budget on out-of-scope activity
+- ❌ `Self-reported success ≠ actual success`: the agent's final summary claimed "could not navigate" yet the judge confirmed it did navigate correctly at the start. The model's working memory degraded over 8 steps.
+- 🔧 `Where reasonable engineering fixes the gap`: stricter system prompt with explicit STOP semantics, `max_steps=3` for single-shot tasks, post-action validation gate
+
+**Cost vs frontier (back-of-envelope, will be measured in Phase 2)**:
+- Local 7B: 180 sec @ ¥0
+- Frontier API (estimated 5-15 sec for the same task): ~¥1-3 per run, but ~15-30x faster with task discipline
+- → For one-shot simple extractions, local is viable; for multi-step agentic flows, frontier is honestly the right call
+
+Phase 2 will run baseline_v2 with engineering fixes (stricter prompt + tighter step budget) and populate richer cost-tier comparisons.
+
 ## Memory Bank
 
 `memory_bank/` follows the [Cline Memory Bank pattern](https://docs.cline.bot/getting-started/memory-bank): logbook (append-only events), activeContext (current focus), decisionLog (ADRs), productContext (what/why), systemPatterns (how).

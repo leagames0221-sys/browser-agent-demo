@@ -1,0 +1,9 @@
+{
+  "model": "qwen2.5:7b",
+  "host": "ollama-local",
+  "task": "visit example.com and report title + H1",
+  "max_steps": 8,
+  "elapsed_sec": 180.08,
+  "final_result": "Max steps reached. Could not navigate to the target URL due to network issues. No data could be collected.",
+  "is_done": true
+}
